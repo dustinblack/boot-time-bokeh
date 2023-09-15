@@ -5,7 +5,9 @@ import copy
 import json
 import re
 
-f = open("dblack_test_09_14_2023_19_25_18.json")
+source_file = "dblack_test_09_15_2023_18_46_39.json"
+
+f = open(source_file)
 
 boot_time_data = json.load(f)
 
@@ -98,12 +100,12 @@ hover = HoverTool(
 
 output_notebook()
 
-p = figure(title=f"Boot Time Measurements -- {len(sorted_data['id'])} Actions", y_axis_label="Boot Action (Sequence ID)",
+p = figure(title=f"Boot Time Measurements -- {len(sorted_data['id'])} Actions -- {source_file}", y_axis_label="Boot Action (Sequence ID)",
            x_axis_label="Time Since Start (ms)", width=1000, height=700)
 p.hbar(y="id", left="start", right="end", source=source, color="color", height="bar_height")
 p.tools.append(hover)
 p.y_range.flipped = True
-p.title.text_font_size = '20pt'
+p.title.text_font_size = '15pt'
 p.axis.major_label_text_font_size = "15pt"
 p.axis.axis_label_text_font_size = "15pt"
 
