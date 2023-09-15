@@ -34,30 +34,29 @@ for item in boot_time_data:
                 log_source.append("dmesg")
             n += 1
 
-# del boot_time_index[100:]
-# del action_duration[100:]
-
 data = {"id": action_id, "start": action_start_time, "duration": action_duration, "end": action_end_time,
         "name": action_name, "log_source": log_source}
 source = ColumnDataSource(data=data)
 
-hover = HoverTool(tooltips=[
-    ("Source", "@log_source"),
-    ("Name", "@name"),
-    ("Started", "@start ms"),
-    ("Ended", "@end ms"),
-    ("Run Time", "@duration ms"),
-])
+hover = HoverTool(
+    tooltips=[
+        ("Source", "@log_source"),
+        ("Name", "@name"),
+        ("Started", "@start ms"),
+        ("Ended", "@end ms"),
+        ("Run Time", "@duration ms"),
+    ],
+    point_policy="follow_mouse",
+)
 
 output_notebook()
 
 p = figure(title=f"Boot Time Measurements -- {len(action_id)} Actions", y_axis_label="Time Since Start (ms)",
-           x_axis_label="Boot Action (Sequence ID)", width=2500, height=3500)
+           x_axis_label="Boot Action (Sequence ID)", width=1000, height=1500)
 p.vbar(x="id", bottom="start", top="end", source=source, legend_label="Action Duration", color="red", width=1)
-# p.y_range.flipped = True
 p.tools.append(hover)
-p.title.text_font_size = '30pt'
-p.axis.major_label_text_font_size = "20pt"
-p.axis.axis_label_text_font_size = "20pt"
+p.title.text_font_size = '20pt'
+p.axis.major_label_text_font_size = "15pt"
+p.axis.axis_label_text_font_size = "15pt"
 
 show(p)
