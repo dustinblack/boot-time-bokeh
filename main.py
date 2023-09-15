@@ -15,16 +15,16 @@ action_end_time = []
 action_name = []
 log_source = []
 color = []
-width = []
+height = []
 
 min_duration = 0
 max_duration = 100000
-max_index = 10000
+max_index = 20000
 
 std_color = "red"
 high_color = "green"
-std_width = 1
-high_width = 10
+std_height = 1
+high_height = 10
 high_pattern = ("multi-user.target")
 
 n = 1
@@ -39,12 +39,11 @@ for item in boot_time_data:
             action_end_time.append(round((i["activating"] + i["time"]) / 1000, 3))
             action_name.append(i["name"])
             if re.search(high_pattern, i["name"]):
-                print(i["name"])
                 color.append(high_color)
-                width.append(high_width)
+                height.append(high_height)
             else:
                 color.append(std_color)
-                width.append(std_width)
+                height.append(std_height)
             if "activated" in i:
                 log_source.append("systemd")
             else:
@@ -59,7 +58,7 @@ data = {
     "name": action_name,
     "log_source": log_source,
     "color": color,
-    "width": width
+    "height": height
 }
 
 source = ColumnDataSource(data=data)
@@ -79,7 +78,8 @@ output_notebook()
 
 p = figure(title=f"Boot Time Measurements -- {len(action_id)} Actions", y_axis_label="Boot Action (Sequence ID)",
            x_axis_label="Time Since Start (ms)", width=1000, height=700)
-p.hbar(y="id", left="start", right="end", source=source, legend_label="Action Duration", color="color", width="width")
+p.hbar(y="id", left="start", right="end", source=source, legend_label="Action Duration", color="color", width="width",
+       height="height")
 p.tools.append(hover)
 p.y_range.flipped = True
 p.title.text_font_size = '20pt'
