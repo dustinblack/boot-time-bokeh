@@ -91,9 +91,9 @@ hover = HoverTool(
     tooltips=[
         ("Source", "@log_source"),
         ("Name", "@name"),
-        ("Started", "@start ms"),
-        ("Ended", "@end ms"),
-        ("Run Time", "@duration ms"),
+        ("Started", "@start{0.00} ms"),
+        ("Ended", "@end{0.00} ms"),
+        ("Run Time", "@duration{0.00} ms"),
     ],
     point_policy="follow_mouse",
 )
