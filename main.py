@@ -1,6 +1,9 @@
+import numpy as np
 from bokeh.plotting import figure, show
 from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.io import output_notebook
+from operator import itemgetter
+
 import json
 import re
 
@@ -8,58 +11,69 @@ f = open("dblack_test_09_14_2023_19_25_18.json")
 
 boot_time_data = json.load(f)
 
-action_id = []
-action_start_time = []
-action_duration = []
-action_end_time = []
-action_name = []
-log_source = []
-color = []
-height = []
+data = {
+    "id": [],
+    "start": [],
+    "duration": [],
+    "end": [],
+    "name": [],
+    "log_source": [],
+    "color": [],
+    "bar_height": [],
+}
 
 min_duration = 0
 max_duration = 100000
 max_index = 20000
 
-std_color = "red"
-high_color = "green"
-std_height = 1
-high_height = 10
-high_pattern = ("multi-user.target")
+dmesg_color = "blue"
+systemd_color = "red"
+highlight_color = "green"
+standard_height = 1
+highlight_height = 20
+highlight_pattern = "multi-user.target"
 
 n = 1
 
 for item in boot_time_data:
     for i in item["timing_details"]:
-        if (i["time"] / 1000 >= min_duration and i["time"] / 1000 <= max_duration and i[
-            "activating"] / 1000 < max_index) or re.search(high_pattern, i["name"]):
-            action_id.append(n)
-            action_start_time.append(round(i["activating"] / 1000, 3))
-            action_duration.append(round(i["time"] / 1000, 3))
-            action_end_time.append(round((i["activating"] + i["time"]) / 1000, 3))
-            action_name.append(i["name"])
-            if re.search(high_pattern, i["name"]):
-                color.append(high_color)
-                height.append(high_height)
-            else:
-                color.append(std_color)
-                height.append(std_height)
+        if (min_duration <= i["time"] / 1000 <= max_duration and i["activating"] / 1000 < max_index) or re.search(
+                highlight_pattern, i["name"]):
+            data["id"].append(n)
+            data["start"].append(round(i["activating"] / 1000, 3))
+            data["duration"].append(round(i["time"] / 1000, 3))
+            data["end"].append(round((i["activating"] + i["time"]) / 1000, 3))
+            data["name"].append(i["name"])
             if "activated" in i:
-                log_source.append("systemd")
+                data["log_source"].append("systemd")
             else:
-                log_source.append("dmesg")
+                data["log_source"].append("dmesg")
+            if re.search(highlight_pattern, i["name"]):
+                data["color"].append(highlight_color)
+                data["bar_height"].append(highlight_height)
+            else:
+                if "activated" in i:
+                    data["color"].append(systemd_color)
+                else:
+                    data["color"].append(dmesg_color)
+                data["bar_height"].append(standard_height)
             n += 1
 
-data = {
-    "id": action_id,
-    "start": action_start_time,
-    "duration": action_duration,
-    "end": action_end_time,
-    "name": action_name,
-    "log_source": log_source,
-    "color": color,
-    "height": height
-}
+# z = zip(
+#         data["start"],
+#         data["duration"],
+#         data["end"],
+#         data["name"],
+#         data["log_source"],
+#         data["color"],
+#         data["bar_height"],
+#     )
+
+
+# for id, n in enumerate(Z["start"]):
+#     data["id"].append(id)
+#
+# print(data)
 
 source = ColumnDataSource(data=data)
 
@@ -76,10 +90,9 @@ hover = HoverTool(
 
 output_notebook()
 
-p = figure(title=f"Boot Time Measurements -- {len(action_id)} Actions", y_axis_label="Boot Action (Sequence ID)",
+p = figure(title=f"Boot Time Measurements -- {len(data['id'])} Actions", y_axis_label="Boot Action (Sequence ID)",
            x_axis_label="Time Since Start (ms)", width=1000, height=700)
-p.hbar(y="id", left="start", right="end", source=source, legend_label="Action Duration", color="color", width="width",
-       height="height")
+p.hbar(y="id", left="start", right="end", source=source, color="color", height="bar_height")
 p.tools.append(hover)
 p.y_range.flipped = True
 p.title.text_font_size = '20pt'
