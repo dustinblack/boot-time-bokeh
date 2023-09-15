@@ -51,10 +51,11 @@ hover = HoverTool(
 
 output_notebook()
 
-p = figure(title=f"Boot Time Measurements -- {len(action_id)} Actions", y_axis_label="Time Since Start (ms)",
-           x_axis_label="Boot Action (Sequence ID)", width=1000, height=1500)
-p.vbar(x="id", bottom="start", top="end", source=source, legend_label="Action Duration", color="red", width=1)
+p = figure(title=f"Boot Time Measurements -- {len(action_id)} Actions", y_axis_label="Boot Action (Sequence ID)",
+           x_axis_label="Time Since Start (ms)", width=1000, height=700)
+p.hbar(y="id", left="start", right="end", source=source, legend_label="Action Duration", color="red", width=1)
 p.tools.append(hover)
+p.y_range.flipped = True
 p.title.text_font_size = '20pt'
 p.axis.major_label_text_font_size = "15pt"
 p.axis.axis_label_text_font_size = "15pt"
