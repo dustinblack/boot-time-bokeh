@@ -1,7 +1,7 @@
 from bokeh.plotting import figure, show
 from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.io import output_notebook
-
+import copy
 import json
 import re
 
@@ -20,6 +20,8 @@ data = {
     "bar_height": [],
 }
 
+sorted_data = copy.deepcopy(data)
+
 min_duration = 0
 max_duration = 100000
 max_index = 20000
@@ -37,7 +39,6 @@ for item in boot_time_data:
     for i in item["timing_details"]:
         if (min_duration <= i["time"] / 1000 <= max_duration and i["activating"] / 1000 < max_index) or re.search(
                 highlight_pattern, i["name"]):
-            data["id"].append(n)
             data["start"].append(round(i["activating"] / 1000, 3))
             data["duration"].append(round(i["time"] / 1000, 3))
             data["end"].append(round((i["activating"] + i["time"]) / 1000, 3))
@@ -57,23 +58,32 @@ for item in boot_time_data:
                 data["bar_height"].append(standard_height)
             n += 1
 
-# z = zip(
-#         data["start"],
-#         data["duration"],
-#         data["end"],
-#         data["name"],
-#         data["log_source"],
-#         data["color"],
-#         data["bar_height"],
-#     )
+
+sstart, sduration, send, sname, slog_source, scolor, sbar_height = (
+    list(t) for t in zip(*sorted(zip(
+        data["start"],
+        data["duration"],
+        data["end"],
+        data["name"],
+        data["log_source"],
+        data["color"],
+        data["bar_height"],
+    )))
+)
+
+sorted_data["start"] = sstart
+sorted_data["duration"] = sduration
+sorted_data["end"] = send
+sorted_data["name"] = sname
+sorted_data["log_source"] = slog_source
+sorted_data["color"] = scolor
+sorted_data["bar_height"] = sbar_height
 
 
-# for id, n in enumerate(Z["start"]):
-#     data["id"].append(id)
-#
-# print(data)
+for id, n in enumerate(sorted_data["start"]):
+    sorted_data["id"].append(id)
 
-source = ColumnDataSource(data=data)
+source = ColumnDataSource(data=sorted_data)
 
 hover = HoverTool(
     tooltips=[
@@ -88,7 +98,7 @@ hover = HoverTool(
 
 output_notebook()
 
-p = figure(title=f"Boot Time Measurements -- {len(data['id'])} Actions", y_axis_label="Boot Action (Sequence ID)",
+p = figure(title=f"Boot Time Measurements -- {len(sorted_data['id'])} Actions", y_axis_label="Boot Action (Sequence ID)",
            x_axis_label="Time Since Start (ms)", width=1000, height=700)
 p.hbar(y="id", left="start", right="end", source=source, color="color", height="bar_height")
 p.tools.append(hover)
