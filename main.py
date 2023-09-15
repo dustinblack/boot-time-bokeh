@@ -22,7 +22,7 @@ max_duration = 100000
 max_index = 10000
 
 std_color = "red"
-high_color = "yellow"
+high_color = "green"
 std_width = 1
 high_width = 10
 high_pattern = ("multi-user.target")
