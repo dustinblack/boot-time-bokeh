@@ -1,8 +1,6 @@
-import numpy as np
 from bokeh.plotting import figure, show
 from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.io import output_notebook
-from operator import itemgetter
 
 import json
 import re
