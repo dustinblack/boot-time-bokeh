@@ -32,7 +32,7 @@ dmesg_color = "blue"
 systemd_color = "red"
 highlight_color = "green"
 standard_height = 1
-highlight_height = 20
+highlight_height = 100
 highlight_pattern = "multi-user.target"
 
 n = 1
