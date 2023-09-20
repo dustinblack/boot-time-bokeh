@@ -36,11 +36,11 @@ max_start_time = 20000
 dmesg_color = "blue"
 systemd_color = "red"
 standard_bar_height = 1
-chart_width = 1000
-chart_height = 700
+chart_width = 2000
+chart_height = 1400
 
 # Highlight formatting based on regular expression match
-highlight_re_pattern = "multi-user.target|initrd-switch-root"
+highlight_re_pattern = "multi-user.target|Load Kernel Modules"
 highlight_color = "green"
 highlight_bar_height = 2
 
@@ -69,7 +69,6 @@ for item in boot_time_data:
                 data["bar_height"].append(standard_bar_height)
                 data["label"].append(None)
 
-
 # Parallel-sort the data structure lists based on start time
 (
     sorted_data["start"],
@@ -82,20 +81,23 @@ for item in boot_time_data:
     sorted_data["bar_height"]
 ) = (
     list(t) for t in zip(*sorted(zip(
-        data["start"],
-        data["duration"],
-        data["end"],
-        data["name"],
-        data["label"],
-        data["log_source"],
-        data["color"],
-        data["bar_height"],
-    )))
+    data["start"],
+    data["duration"],
+    data["end"],
+    data["name"],
+    data["label"],
+    data["log_source"],
+    data["color"],
+    data["bar_height"],
+)))
 )
 
 # Enumerate the log items sequentially after sort
 for id, n in enumerate(sorted_data["start"]):
     sorted_data["id"].append(id)
+
+# Get total number of actions
+total_actions = len(sorted_data['id'])
 
 # Convert the data into a ColumnDataSource for Bokeh
 source = ColumnDataSource(data=sorted_data)
@@ -114,7 +116,7 @@ hover = HoverTool(
 
 # Build the Bokeh chart
 p = figure(
-    title=f"Boot Time Measurements -- {len(sorted_data['id'])} Actions -- {source_file}",
+    title=f"Boot Time Measurements -- {total_actions} Actions -- {source_file}",
     y_axis_label="Boot Action (Sequence ID)",
     x_axis_label="Time Since Start (ms)",
     width=chart_width,
