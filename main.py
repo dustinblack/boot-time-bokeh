@@ -5,7 +5,7 @@ import copy
 import json
 import re
 
-source_file = "dblack_test_09_18_2023_12_11_40.json"
+source_file = "dblack_test_09_18_2023_12_11_40.json" 
 
 f = open(source_file)
 
@@ -36,13 +36,18 @@ max_start_time = 20000
 dmesg_color = "blue"
 systemd_color = "red"
 standard_bar_height = 1
-chart_width = 2000
+chart_width = 2000 
 chart_height = 1400
 
 # Highlight formatting based on regular expression match
-highlight_re_pattern = "multi-user.target|Load Kernel Modules"
+highlight_re_pattern = "multi-user.target|sysinit.target|Load Kernel Modules|mounted"
 highlight_color = "green"
 highlight_bar_height = 2
+
+# Get SUT info
+test_date = boot_time_data[0]["date"]
+test_config = boot_time_data[0]["test_config"]
+system_config = boot_time_data[0]["system_config"]
 
 # Parse the data file for metrics of interest
 for item in boot_time_data:
@@ -69,6 +74,7 @@ for item in boot_time_data:
                 data["bar_height"].append(standard_bar_height)
                 data["label"].append(None)
 
+
 # Parallel-sort the data structure lists based on start time
 (
     sorted_data["start"],
@@ -81,24 +87,24 @@ for item in boot_time_data:
     sorted_data["bar_height"]
 ) = (
     list(t) for t in zip(*sorted(zip(
-    data["start"],
-    data["duration"],
-    data["end"],
-    data["name"],
-    data["label"],
-    data["log_source"],
-    data["color"],
-    data["bar_height"],
-)))
+        data["start"],
+        data["duration"],
+        data["end"],
+        data["name"],
+        data["label"],
+        data["log_source"],
+        data["color"],
+        data["bar_height"],
+    )))
 )
 
 # Enumerate the log items sequentially after sort
 for id, n in enumerate(sorted_data["start"]):
     sorted_data["id"].append(id)
-
+    
 # Get total number of actions
 total_actions = len(sorted_data['id'])
-
+    
 # Convert the data into a ColumnDataSource for Bokeh
 source = ColumnDataSource(data=sorted_data)
 
@@ -116,18 +122,25 @@ hover = HoverTool(
 
 # Build the Bokeh chart
 p = figure(
-    title=f"Boot Time Measurements -- {total_actions} Actions -- {source_file}",
+    title=f"""Boot Time Measurements -- {total_actions} Actions
+    
+    File: {source_file}
+    Date: {test_date}
+    IP: {test_config['IPaddr']}
+    Release: {system_config['osrelease']}
+    Kernel: {system_config['kernel']}
+    """, 
     y_axis_label="Boot Action (Sequence ID)",
-    x_axis_label="Time Since Start (ms)",
-    width=chart_width,
+    x_axis_label="Time Since Start (ms)", 
+    width=chart_width, 
     height=chart_height,
 )
 p.hbar(
-    y="id",
-    left="start",
-    right="end",
-    source=source,
-    color="color",
+    y="id", 
+    left="start", 
+    right="end", 
+    source=source, 
+    color="color", 
     height="bar_height",
 )
 p.tools.append(hover)
@@ -138,12 +151,12 @@ p.axis.axis_label_text_font_size = "15pt"
 
 # Label the highlighted items
 labels = LabelSet(
-    x="start",
-    y="id",
+    x="start", 
+    y="id", 
     text="label",
-    x_offset=5,
-    y_offset=5,
-    source=source,
+    x_offset=5, 
+    y_offset=5, 
+    source=source, 
     text_color=highlight_color,
     background_fill_color="white",
     border_line_color=highlight_color,
